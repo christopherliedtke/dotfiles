@@ -33,10 +33,14 @@ packages=(
     "bash"
     "zsh"
     "git"
-    "tree"
-    "pylint"
-    "black"
     "node"
+    "awscli"
+    "mongosh"
+    "node"
+    "nodenv"
+    "openssl@3"
+    "redis"
+    "stripe"
 )
 
 # Loop over the array to install each application.
@@ -76,18 +80,22 @@ $(brew --prefix)/bin/npm install --global prettier
 # Define an array of applications to install using Homebrew Cask.
 apps=(
     "google-chrome"
-    "firefox"
-    "brave-browser"
-    "sublime-text"
     "visual-studio-code"
-    "virtualbox"
     "spotify"
-    "discord"
     "google-drive"
     "gimp"
     "vlc"
     "rectangle"
     "postman"
+    "asana"
+    "cheatsheet"
+    "figma"
+    "joplin"
+    "keepassxc"
+    "maccy"
+    "microsoft-office"
+    "slask"
+    "tor-browser"
 )
 
 # Loop over the array to install each application.
@@ -131,14 +139,23 @@ brew cleanup
 echo "Sign in to Google Chrome. Press enter to continue..."
 read
 
-echo "Sign in to Spotify. Press enter to continue..."
+echo "Sign in to Google Drive. Press enter to continue..."
 read
 
-echo "Sign in to Discord. Press enter to continue..."
+echo "Sign in to Spotify. Press enter to continue..."
 read
 
 echo "Open Rectangle and give it necessary permissions. Press enter to continue..."
 read
 
 echo "Import your Rectangle settings located in ~/dotfiles/settings/RectangleConfig.json. Press enter to continue..."
+read
+
+echo "Sign in to joplin and sync data. Press enter to continue..."
+read
+
+echo "Sign in to asana. Press enter to continue..."
+read
+
+echo "Sign in to figma. Press enter to continue..."
 read

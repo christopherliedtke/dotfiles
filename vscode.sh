@@ -7,16 +7,33 @@ fi
 
 # Install VS Code Extensions
 extensions=(
-    ms-python.python
-    ms-python.pylint
-    ms-python.vscode-pylance
-    ms-python.debugpy
-    GitHub.copilot
-    ms-vscode.Theme-PredawnKit
-    teabyii.ayu
-    formulahendry.code-runner
+    # ms-python.python
+    # ms-python.pylint
+    # ms-python.vscode-pylance
+    # ms-python.debugpy
+    # GitHub.copilot
+    # ms-vscode.Theme-PredawnKit
+    # teabyii.ayu
+    # formulahendry.code-runner
+    # esbenp.prettier-vscode
+    # znck.grammarly
+    aaron-bond.better-comments
+    formulahendry.auto-rename-tag
+    mikestead.dotenv
+    dbaeumer.vscode-eslint
+    github.vscode-github-actions
+    eamodio.gitlens
+    kisstkondoros.vscode-gutter-preview
+    wix.vscode-import-cost
+    zignd.html-css-class-completion
+    ritwickdey.liveserver
+    pkief.material-icon-theme
+    cardinal90.multi-cursor-case-preserve
+    sdras.night-owl
+    christian-kohler.path-intellisense
     esbenp.prettier-vscode
-    znck.grammarly
+    yoavbls.pretty-ts-errors
+    mechatroner.rainbow-csv
 )
 
 # Get a list of all currently installed extensions.
