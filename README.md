@@ -1,87 +1,77 @@
-# Development Environment Setup
+# dotfiles
 
-This repository contains scripts and configuration files to set up a development environment for macOS. It's tailored for software development, focusing on a clean, minimal, and efficient setup.
+Personal macOS development environment setup for Apple Silicon Macs.
 
-## YouTube Video Walkthrough
+Automates everything: system preferences, Homebrew packages & apps, shell configuration (zsh + oh-my-zsh + powerlevel10k), SSH key setup, and VS Code / Cursor extensions.
 
-Click on the image below to watch the video on YouTube:
+> **Note:** These are highly personalized to my own workflow. Fork and adapt rather than running as-is.
 
-[![Watch the video](https://img.youtube.com/vi/ra5kMCXO-6I/0.jpg)](https://youtu.be/ra5kMCXO-6I)
+---
 
-## Overview
+## Quick Start (new Mac)
 
-The setup includes automated scripts for installing essential software, configuring Bash and Zsh shells, and setting up Sublime Text and Visual Studio Code editors. This guide will help you replicate my development environment on your machine if you desire to do so.
+```bash
+# 1. Install Xcode Command Line Tools (provides git before Homebrew)
+xcode-select --install
 
-## Important Note Before Installation
+# 2. Clone
+git clone https://github.com/christopherliedtke/dotfiles.git ~/dotfiles
 
-**WARNING:** The configurations and scripts in this repository are **HIGHLY PERSONALIZED** to my own preferences and workflows. If you decide to use them, please be aware that they will **MODIFY** your current system, potentially making some changes that are **IRREVERSIBLE** without a fresh installation of your operating system.
+# 3. Run
+cd ~/dotfiles && ./install.sh
+```
 
-Furthermore, while I strive to backup files wherever possible, I cannot guarantee that all files are backed up. The backup mechanism is designed to backup SOME files **ONCE**. If the script is run more than once, the initial backups will be **OVERWRITTEN**, potentially resulting in loss of data. While I could implement timestamped backups to preserve multiple versions, this setup is optimized for my personal use, and a single backup suffices for me.
+See [MIGRATION.md](MIGRATION.md) for the full step-by-step guide including what to export from your old Mac first.
 
-If you would like a development environment similar to mine, I highly encourage you to fork this repository and make your own personalized changes to these scripts instead of running them exactly as I have them written for myself.
+---
 
-A less serious (but potentially annoying) change it will make is setting the Desktop background to the image I use in my tutorials. This is the script I use to set up machines I will be recording on, after all.
+## What's Included
 
-I likely won't accept pull requests unless they align closely with my personal preferences and the way I use my development environment. But if there are some obvious errors in my scripts then corrections would be welcome!
+### Scripts
 
-If you choose to run these scripts, please do so with **EXTREME CAUTION**. It's recommended to review the scripts and understand the changes they will make to your system before proceeding.
+| Script | Purpose |
+|--------|---------|
+| `install.sh` | Main entry point — runs all steps in order |
+| `macOS.sh` | System preferences (trackpad, dock, finder, energy, etc.) |
+| `brew.sh` | Homebrew formulae, apps, fonts, Oh My Zsh, nodenv, git config |
+| `ssh.sh` | SSH key generation + GitHub upload via `gh` CLI |
+| `vscode.sh` | Extensions + settings for VS Code and Cursor |
 
-By using these scripts, you acknowledge and accept the risk of potential data loss or system alteration. Proceed at your own risk.
+### Shell
 
-## Getting Started
+| File | Purpose |
+|------|---------|
+| `.zshrc` | Main shell config — oh-my-zsh, powerlevel10k, zsh plugins, nodenv, pnpm |
+| `.zprofile` | Login shell — Homebrew PATH |
+| `.aliases` | Shortcuts for git, ls, brew, Finder, screencasting, Python venvs |
+| `.p10k.zsh` | Powerlevel10k prompt config |
+| `.private` | Local secrets, not tracked (create manually) |
 
-### Prerequisites
+### Settings
 
--  macOS (The scripts are tailored for macOS)
+| File | Purpose |
+|------|---------|
+| `settings/VSCode-Settings.json` | VS Code / Cursor editor settings |
+| `settings/VSCode-Keybindings.json` | VS Code / Cursor keybindings |
+| `settings/iTerm2-Profile.json` | iTerm2 profile (auto-installed via DynamicProfiles) |
+| `settings/Raycast.rayconfig` | Raycast settings export |
 
-### Installation
+---
 
-1. Clone the repository to your local machine:
-   ```sh
-   git clone https://github.com/CoreyMSchafer/dotfiles.git ~/dotfiles
-   ```
-2. Navigate to the `dotfiles` directory:
-   ```sh
-   cd ~/dotfiles
-   ```
-3. Run the installation script:
-   ```sh
-   ./install.sh
-   ```
+## Key Tools Installed
 
-This script will:
+**CLI:** zsh, git, gh, python, nodenv, pnpm, uv, ripgrep, awscli, heroku, stripe, mongosh, redis, mas
 
--  Create symlinks for dotfiles (`.bashrc`, `.zshrc`, etc.)
--  Run macOS-specific configurations
--  Install Homebrew packages and casks
--  Configure Sublime Text and Visual Studio Code
+**Apps:** Cursor, VS Code, iTerm2, cmux, Chrome, Zen Browser, Raycast, Slack, Figma, Postman, Bruno, Joplin, Asana, Spark, KeePassXC, Spotify, GIMP, VLC, and more
 
-## Configuration Files
+**Fonts:** Meslo LG Nerd Font (for powerlevel10k), Source Code Pro
 
--  `.bashrc` & `.zshrc`: Shell configuration files for Bash and Zsh.
--  `.shared_prompt`: Custom prompt setup used by both `.bash_prompt` & `.zprompt`
--  `.bash_prompt` & `.zprompt`: Custom prompt setup for Bash and Zsh.
--  `.bash_profile: Setting system-wide environment variables
--  `.aliases`: Aliases for common commands. Some are personalized to my machines specifically (e.g. the 'yt' alias opening my YouTube Scripts')
--  `.private`: This is a file you'll create locally to hold private information and shouldn't be uploaded to version control
--  `settings/`: Directory containing editor settings and themes for Sublime Text and Visual Studio Code.
-
-### Customizing Your Setup
-
-You're encouraged to modify the scripts and configuration files to suit your preferences. Here are some tips for customization:
-
--  **Dotfiles**: Edit `.shared_prompt`, `.zprompt`, `.bash_prompt` to add or modify shell configurations.
--  **Sublime Text and VS Code**: Adjust settings in the `settings/` directory to change editor preferences and themes.
-
-## Contributing
-
-Feel free to fork this repository and customize it for your setup. Pull requests for improvements and bug fixes are welcome, but as said above, I likely won't accept pull requests that simply add additional brew installations or change some settings unless they align with my personal preferences.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE-MIT.txt](LICENSE-MIT.txt) file for details.
+---
 
 ## Acknowledgments
 
--  I originally forked this from [Mathias Bynens' dotfiles](https://github.com/mathiasbynens/dotfiles)
--  Thanks to all the open-source projects used in this setup.
+Originally forked from [Mathias Bynens' dotfiles](https://github.com/mathiasbynens/dotfiles).
+
+## License
+
+MIT — see [LICENSE-MIT.txt](LICENSE-MIT.txt)
