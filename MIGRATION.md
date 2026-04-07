@@ -561,6 +561,61 @@ Re-login with your NordVPN account credentials after installing.
 
 ---
 
+## M1 Pro → M5 Pro: Hardware Differences
+
+Your current machine is a **MacBook Pro 14" M1 Pro (2021)** (`MacBookPro18,3`, 8-core CPU, 16 GB RAM, 500 GB SSD). The target is the **MacBook Pro 14" M5 Pro (2026)**.
+
+### What changes
+
+| | M1 Pro (current) | M5 Pro (new) |
+|---|---|---|
+| CPU | 8-core (6P+2E) | 15-core (5 super-P + 10P) |
+| GPU | 14-core | 16–20-core |
+| RAM (your config) | 16 GB | up to 64 GB |
+| Memory bandwidth | 200 GB/s | 273 GB/s |
+| Thunderbolt | 3× TB4 (40 Gb/s) | 3× TB5 (120 Gb/s) |
+| HDMI | 2.0 (4K@60Hz) | 2.1 (4K@240Hz / 8K@60Hz) |
+| External displays | 2 max | 3 max |
+| MagSafe | MagSafe 3 | MagSafe 3 (same plug, faster 140W) |
+| Wi-Fi | Wi-Fi 6 | Wi-Fi 7 |
+| macOS (ships with) | macOS 12 Monterey | macOS 26.3 Tahoe |
+
+### What this means for your developer setup
+
+**Zero recompilation needed.** M1 Pro and M5 Pro share the same ARM64 ISA. Every native arm64 binary — Homebrew bottles, Node.js, Python wheels, compiled npm packages (esbuild, swc, sharp), Cursor/VS Code extensions — runs identically on M5 Pro without any changes or rebuilds.
+
+**Your dotfiles scripts work as-is.** `install.sh`, `brew.sh`, `vscode.sh` — all unchanged.
+
+**Thunderbolt 5 is backwards-compatible.** Your existing TB4 hub/dock/cable works at TB4 speeds. You only need new TB5 hardware to use the higher bandwidth or drive a third external display.
+
+**Your MagSafe cable is the same.** The MagSafe 3 connector hasn't changed; the new 140W charger is faster but your existing adapter works.
+
+### Rosetta 2 audit — do this before migrating
+
+macOS 26.4 now actively warns you when you launch an Intel-only (x86_64) binary. macOS 27 (late 2026) will be the last to support Rosetta 2; macOS 28 drops it.
+
+Check if you have any lingering Intel-only tools:
+```bash
+# Find x86_64-only apps in /Applications
+find /Applications -name "Info.plist" -exec grep -l "x86_64" {} \; 2>/dev/null
+
+# Or use the free "Silicon" app from the Mac App Store for a visual audit
+```
+
+For your developer toolchain specifically:
+```bash
+# Verify your key binaries are arm64 (not x86_64)
+file $(which brew) $(which node) $(which python3) $(which git)
+# All should say: Mach-O 64-bit executable arm64
+```
+
+If any show `x86_64`, that means they were installed under Rosetta — reinstall natively before migrating.
+
+### Docker
+Docker Desktop works identically. `linux/arm64` images run natively. `linux/amd64` images still use Rosetta 2 emulation ("Use Rosetta" toggle in Docker settings) — this continues to work on M5 Pro for now but will stop working when Rosetta 2 is removed. Prefer arm64 images where possible.
+
+---
+
 ## Common Migration Pitfalls
 
 Things that commonly go wrong for developers migrating to a new Mac — especially on Apple Silicon / macOS Sequoia.
