@@ -346,30 +346,27 @@ git clone git@github.com:christopherliedtke/mfa-mal-anders-nextjs.git
 
 Use `gh repo list christopherliedtke --limit 50` to get a full list of your repos.
 
-### .env files (the critical part)
+### Gitignored files — full inventory
 
-`.env` files are gitignored and **will not** be in the cloned repos. You currently have 23 of them across `~/DEV`. The `backup-envs.sh` script (run on the old Mac) backs them all up.
-
-On the new Mac, unzip the backup and copy them back:
+The `backup-envs.sh` script captures everything below. Run it on the old Mac, then restore from the zip on the new one.
 
 ```bash
-# Unzip with the password you set during backup
-unzip env-backup-YYYY-MM-DD.zip -d /tmp/env-restore
+# Old Mac — create the backup
+cd ~/dotfiles && ./backup-envs.sh
+# → produces ~/Desktop/env-backup-YYYY-MM-DD.zip (password-protected)
 
-# Then for each project, copy the relevant .env files, e.g.:
-cp /tmp/env-restore/DEV/projects/mfa-mal-anders-nextjs/.env.local \
-   ~/DEV/projects/mfa-mal-anders-nextjs/
-
-# Clean up when done
-rm -rf /tmp/env-restore
+# New Mac — restore
+unzip ~/Desktop/env-backup-YYYY-MM-DD.zip -d /tmp/env-restore
+# then copy files as described below
+rm -rf /tmp/env-restore   # clean up when done
 ```
 
-Your projects and their env files:
+#### .env files (23 across projects)
 
-| Project | Env files |
-|---------|-----------|
+| Project | Files |
+|---------|-------|
 | `mfa-mal-anders-nextjs` | `.env.local`, `.env.test`, `bru_mfa-mal-anders/.env` |
-| `mfa-mal-anders-vuejobboard` | `.env`, `.env.dev`, `.env.local`, `client/.env.development.local`, `client/.env.production.local` |
+| `mfa-mal-anders-vuejobboard` | `.env`, `.env.dev`, `.env.local`, `client/.env.*.local` |
 | `zfa-mal-anders` | `.env.development`, `.env.local`, `.env.production`, `.env.test`, `bru_zfa-mal-anders/.env` |
 | `arzt-mal-anders-vuejobboard` | `.env` |
 | `praxis-website-builder` | `.env` |
@@ -378,74 +375,189 @@ Your projects and their env files:
 | `ZuckerRede.de` | `.env` |
 | `DEV/ai/mfa-mal-anders` | `.env` |
 
-### AWS credentials
-
-The backup script copies `~/.aws/`. On the new Mac, restore it:
-
+After cloning each project, copy its env files back:
 ```bash
-cp -r /tmp/env-restore/.aws ~/
-chmod 600 ~/.aws/credentials
+cp -r /tmp/env-restore/DEV/projects/mfa-mal-anders-nextjs/.env* \
+      ~/DEV/projects/mfa-mal-anders-nextjs/
+# repeat per project
 ```
 
-Verify with: `aws sts get-caller-identity`
+#### Credential files (gitignored, not .env)
 
-### Stripe CLI
+| File | What it is |
+|------|------------|
+| `DEV/ai/mfa-mal-anders/google-service-account.json` | Google Cloud service account key |
+| `DEV/projects/CarCheckApp/utils/secrets.json` | AWS + MongoDB credentials |
 
-The backup script copies `~/.config/stripe/config.toml`. On the new Mac:
-
+Restore:
 ```bash
-mkdir -p ~/.config/stripe
-cp /tmp/env-restore/.config/stripe/config.toml ~/.config/stripe/
+cp /tmp/env-restore/DEV/ai/mfa-mal-anders/google-service-account.json \
+   ~/DEV/ai/mfa-mal-anders/
+cp /tmp/env-restore/DEV/projects/CarCheckApp/utils/secrets.json \
+   ~/DEV/projects/CarCheckApp/utils/
 ```
 
-Verify with: `stripe config --list`
+#### Per-project AI tool configs
 
-### GitHub CLI (`gh`)
+| File | What it is |
+|------|------------|
+| `*/.claude/settings.local.json` | Claude Code project-level settings |
+| `*/.cursor/mcp.json` | Cursor project-level MCP servers |
+| `*/.mcp.json` | Shared MCP server definitions |
 
-Re-authenticate on the new Mac — the token is stored in the macOS Keychain and won't transfer:
-
+Restore:
 ```bash
-gh auth login
+# For each project — example:
+mkdir -p ~/DEV/projects/mfa-mal-anders-nextjs/.claude
+cp /tmp/env-restore/DEV/projects/mfa-mal-anders-nextjs/.claude/settings.local.json \
+   ~/DEV/projects/mfa-mal-anders-nextjs/.claude/
 ```
 
-The `ssh.sh` script handles this automatically during setup.
+### Global CLI credentials
+
+| Credential | Location | How to restore |
+|------------|----------|----------------|
+| AWS | `~/.aws/` | `cp -r /tmp/env-restore/.aws ~/; chmod 600 ~/.aws/credentials` |
+| Stripe | `~/.config/stripe/config.toml` | `mkdir -p ~/.config/stripe && cp /tmp/env-restore/.config/stripe/config.toml ~/.config/stripe/` |
+| Claude Code | `~/.claude/settings.json` | `cp /tmp/env-restore/.claude/settings.json ~/.claude/` |
+| GitHub CLI | macOS Keychain (can't transfer) | Re-run `gh auth login` — handled by `ssh.sh` |
+
+Verify AWS: `aws sts get-caller-identity`
+Verify Stripe: `stripe config --list`
+
+### AI tool configs (non-secret, in dotfiles)
+
+`install.sh` restores these automatically:
+- `~/.config/opencode/config.json` — opencode + ollama setup
+- `~/.cursor/mcp.json` — global Cursor MCP servers (next-devtools, context7)
+
+### Shell history
+
+Included in backup. Restore:
+```bash
+cp /tmp/env-restore/.zsh_history ~/.zsh_history
+```
+Open a new terminal tab to load it.
 
 ### Node versions (nodenv)
 
-`brew.sh` installs Node 22 LTS. If your projects need older versions, install them:
-
+`brew.sh` installs Node 22 LTS. Reinstall older versions as needed:
 ```bash
 nodenv install 20.10.0
 nodenv install 18.17.0
-# etc. — check .nvmrc or .node-version in each project
+# check each project's .nvmrc or .node-version
 ```
 
 ### pnpm global packages
 
-`brew.sh` reinstalls these automatically:
-- `vercel`
-- `eslint`
-- `@agentmail/cli`
-- `agentmail-cli`
+Installed automatically by `brew.sh`: `vercel`, `eslint`, `@agentmail/cli`, `agentmail-cli`
 
-### Shell history
+### Python virtual environments
 
-The backup script includes `~/.zsh_history`. On the new Mac:
-
+`.venv` directories are not backed up — recreate them:
 ```bash
-cp /tmp/env-restore/.zsh_history ~/.zsh_history
+cd ~/DEV/mcp-servers/flights-mcp
+uv sync   # or: python3 -m venv .venv && pip install -r requirements.txt
 ```
-
-Open a new terminal tab to load it.
 
 ### cmux workspaces
 
-cmux stores session state (open tabs, directories) locally — it won't transfer. You'll need to re-open your project workspaces manually after cloning. The workspace names and colors from your session:
+cmux session state is local and won't transfer. Re-create workspaces manually after cloning your projects. Your current workspaces to recreate:
 
 | Workspace | Project |
 |-----------|---------|
 | MfaMalAnders_Code | `~/DEV/projects/mfa-mal-anders-nextjs` |
 | _(others)_ | Re-create from your project list |
+
+---
+
+## Local System Files
+
+Things that live on your Mac outside of git repos and aren't covered by the scripts above.
+
+### ~/Documents
+
+Contains personal and business files (invoices, registrations, PDFs, etc.). These are **not** synced to iCloud or Google Drive automatically.
+
+**Back up before migrating:**
+```bash
+# Copy to Google Drive manually, or to an external drive:
+cp -r ~/Documents ~/Google\ Drive/My\ Drive/Documents-Backup-$(date +%Y-%m-%d)
+```
+
+Or use AirDrop / Migration Assistant to transfer directly to the new Mac.
+
+### ~/Pictures (1.3 GB)
+
+Contains project image assets and your Photos library. **Not synced anywhere automatically.**
+
+| Folder | Content |
+|--------|---------|
+| `01. mfa_mal_anders` | MFA mal anders brand/media assets |
+| `02. arzt_mal_anders` | Arzt mal anders brand/media assets |
+| `03. zfa_mal_anders` | ZFA mal anders brand/media assets |
+| `zuckerrede`, `stadt_und_gruen` | Project assets |
+| `ChristopherLiedtke` | Personal photos/portraits |
+| `campermoments` | Personal photos |
+| `Photos Library.photoslibrary` | macOS Photos app library |
+| `Screenshots` | Probably skippable |
+
+**Back up before migrating:**
+```bash
+# Copy the whole folder to Google Drive
+cp -r ~/Pictures ~/Google\ Drive/My\ Drive/Pictures-Backup-$(date +%Y-%m-%d)
+```
+
+Or use AirDrop / an external drive for the Photos library (it can be large).
+
+> **Note:** If you use iCloud Photos, the Photos library syncs automatically — check in System Settings → iCloud → Photos.
+
+### ~/DEV/ai/mfa-mal-anders/generated-images
+
+AI-generated images (~20+ files). Not in git, not in Google Drive.
+Either push them to Google Drive or accept they can be regenerated.
+
+```bash
+cp -r ~/DEV/ai/mfa-mal-anders/generated-images \
+      ~/Google\ Drive/My\ Drive/mfa-mal-anders-generated-images
+```
+
+### ~/dump.rdb
+
+Redis persistence file in your home directory (88B — essentially empty).
+Not worth migrating; Redis will create a fresh one on the new Mac.
+
+### macOS Keychain
+
+Passwords saved in Safari, system wifi passwords, and some app tokens are stored in the macOS Keychain. These **do not** transfer automatically unless you use Migration Assistant.
+
+Notable items that need re-authentication on the new Mac:
+- GitHub CLI (`gh auth login`)
+- Stripe CLI (restored from backup)
+- Any browser-saved passwords (sync via Chrome or export from Safari)
+
+### Apple ID / iCloud
+
+Sign in with your Apple ID first thing on the new Mac. This restores:
+- App Store purchases and apps
+- iCloud Keychain (if enabled)
+- iCloud Drive files (if you use it)
+
+### App-specific data that auto-syncs via Google Drive
+
+| App | Sync mechanism |
+|-----|----------------|
+| KeePassXC database | Google Drive (open from Drive path) |
+| Joplin notes | Joplin's built-in sync |
+| Google Drive files | Re-sign in to Google Drive app |
+
+### Superwhisper / Wispr Flow
+
+These AI dictation apps store settings locally. Re-configure them after installing — no migration needed for settings, they're minimal.
+
+### NordVPN
+
+Re-login with your NordVPN account credentials after installing.
 
 ---
 

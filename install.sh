@@ -10,6 +10,7 @@
 #   4. SSH key setup (ssh.sh)
 #   5. iTerm2 profile (DynamicProfiles)
 #   6. VS Code + Cursor extensions & settings (vscode.sh)
+#   7. AI tool configs (opencode, Cursor MCP)
 ############################
 
 DOTFILEDIR="${HOME}/dotfiles"
@@ -72,6 +73,23 @@ echo "iTerm2 profile installed. Open iTerm2 → Preferences → Profiles to set 
 echo ""
 echo "Setting up VS Code and Cursor..."
 zsh ./vscode.sh
+
+###############################################################################
+# 7. AI tool configs                                                          #
+###############################################################################
+
+echo ""
+echo "Restoring AI tool configs..."
+
+# opencode
+mkdir -p "$HOME/.config/opencode"
+cp "${DOTFILEDIR}/settings/opencode-config.json" "$HOME/.config/opencode/config.json"
+
+# Cursor global MCP servers
+mkdir -p "$HOME/.cursor"
+cp "${DOTFILEDIR}/settings/cursor-mcp.json" "$HOME/.cursor/mcp.json"
+
+echo "AI tool configs restored."
 
 echo ""
 echo "============================================================"

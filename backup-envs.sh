@@ -4,8 +4,9 @@
 # backup-envs.sh
 #
 # Run this on your OLD Mac before migrating.
-# Collects all .env files from ~/DEV and CLI credentials into a single
-# encrypted zip. Store the zip in KeePassXC, Google Drive, or a USB stick.
+# Collects .env files, secret files, credentials, AI tool configs, and shell
+# history into a single encrypted zip.
+# Store the zip in KeePassXC, Google Drive, or on a USB stick.
 ###############################################################################
 
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M")
@@ -13,81 +14,134 @@ BACKUP_DIR="/tmp/env-backup-$TIMESTAMP"
 ARCHIVE="$HOME/Desktop/env-backup-$TIMESTAMP.zip"
 DEV_DIR="$HOME/DEV"
 
-echo "Creating backup directory at $BACKUP_DIR..."
+echo "Creating backup staging area..."
 mkdir -p "$BACKUP_DIR"
 
+copy_file() {
+    local src=$1
+    local relative="${src#$HOME/}"
+    local target="$BACKUP_DIR/$relative"
+    mkdir -p "$(dirname "$target")"
+    cp "$src" "$target"
+    echo "  + $relative"
+}
+
+copy_dir() {
+    local src=$1
+    local relative="${src#$HOME/}"
+    local target="$BACKUP_DIR/$relative"
+    mkdir -p "$(dirname "$target")"
+    cp -r "$src" "$target"
+    echo "  + $relative/"
+}
+
 ###############################################################################
-# 1. .env files from dev projects                                             #
+# 1. .env files                                                               #
 ###############################################################################
 
-echo "Collecting .env files from $DEV_DIR..."
-
+echo "\n── .env files ──"
 find "$DEV_DIR" \
     -name ".env*" \
     -not -path "*/node_modules/*" \
     -not -path "*/.git/*" \
+    -not -path "*/.venv/*" \
     -not -name "*.example" \
-    | while read -r file; do
-        # Preserve directory structure inside backup
-        relative="${file#$HOME/}"
-        target="$BACKUP_DIR/$relative"
-        mkdir -p "$(dirname "$target")"
-        cp "$file" "$target"
-        echo "  + $relative"
-    done
+    | while read -r f; do copy_file "$f"; done
 
 ###############################################################################
-# 2. AWS credentials                                                          #
+# 2. Other secret files (gitignored credentials)                              #
 ###############################################################################
 
-if [ -d "$HOME/.aws" ]; then
-    echo "Copying ~/.aws..."
-    cp -r "$HOME/.aws" "$BACKUP_DIR/.aws"
+echo "\n── Secret/credential files ──"
+
+# Google service accounts
+find "$DEV_DIR" -name "google-service-account.json" \
+    -not -path "*/node_modules/*" \
+    | while read -r f; do copy_file "$f"; done
+
+# secrets.json files
+find "$DEV_DIR" -name "secrets.json" \
+    -not -path "*/node_modules/*" \
+    | while read -r f; do copy_file "$f"; done
+
+# Any other common secret file patterns
+find "$DEV_DIR" \
+    \( -name "serviceAccountKey.json" -o -name "firebase-adminsdk*.json" \) \
+    -not -path "*/node_modules/*" \
+    | while read -r f; do copy_file "$f"; done
+
+###############################################################################
+# 3. Per-project AI tool configs                                              #
+###############################################################################
+
+echo "\n── Per-project AI configs ──"
+
+# Claude Code project settings
+find "$DEV_DIR" -name "settings.local.json" -path "*/.claude/*" \
+    -not -path "*/node_modules/*" \
+    | while read -r f; do copy_file "$f"; done
+
+# Cursor project MCP configs
+find "$DEV_DIR" -name "mcp.json" -path "*/.cursor/*" \
+    -not -path "*/node_modules/*" \
+    | while read -r f; do copy_file "$f"; done
+
+# Root-level .mcp.json files
+find "$DEV_DIR" -maxdepth 3 -name ".mcp.json" \
+    -not -path "*/node_modules/*" \
+    | while read -r f; do copy_file "$f"; done
+
+###############################################################################
+# 4. Global CLI credentials                                                   #
+###############################################################################
+
+echo "\n── Global CLI credentials ──"
+
+[ -d "$HOME/.aws" ]                          && copy_dir "$HOME/.aws"
+[ -f "$HOME/.config/stripe/config.toml" ]   && copy_file "$HOME/.config/stripe/config.toml"
+[ -f "$HOME/.claude/settings.json" ]        && copy_file "$HOME/.claude/settings.json"
+
+###############################################################################
+# 5. Shell history                                                            #
+###############################################################################
+
+echo "\n── Shell history ──"
+[ -f "$HOME/.zsh_history" ] && copy_file "$HOME/.zsh_history"
+
+###############################################################################
+# 6. Brand assets (not in git, not easily regenerated)                       #
+###############################################################################
+
+echo "\n── Brand assets ──"
+if [ -d "$DEV_DIR/ai/mfa-mal-anders/brand_assets" ]; then
+    copy_dir "$DEV_DIR/ai/mfa-mal-anders/brand_assets"
 fi
 
 ###############################################################################
-# 3. Stripe CLI config                                                        #
-###############################################################################
-
-if [ -f "$HOME/.config/stripe/config.toml" ]; then
-    echo "Copying Stripe config..."
-    mkdir -p "$BACKUP_DIR/.config/stripe"
-    cp "$HOME/.config/stripe/config.toml" "$BACKUP_DIR/.config/stripe/config.toml"
-fi
-
-###############################################################################
-# 4. Shell history                                                            #
-###############################################################################
-
-if [ -f "$HOME/.zsh_history" ]; then
-    echo "Copying zsh history..."
-    cp "$HOME/.zsh_history" "$BACKUP_DIR/.zsh_history"
-fi
-
-###############################################################################
-# 5. Manifest                                                                 #
+# 7. Manifest                                                                 #
 ###############################################################################
 
 find "$BACKUP_DIR" -type f | sed "s|$BACKUP_DIR/||" | sort > "$BACKUP_DIR/MANIFEST.txt"
-echo ""
-echo "Files collected:"
+echo "\nFiles collected:"
 cat "$BACKUP_DIR/MANIFEST.txt"
 
 ###############################################################################
-# 6. Encrypt as zip                                                           #
+# 8. Encrypt as zip                                                           #
 ###############################################################################
 
-echo ""
-echo "Creating encrypted zip at $ARCHIVE..."
+echo "\nCreating encrypted zip at $ARCHIVE..."
 echo "You will be prompted for a password — store it in KeePassXC."
 zip -er "$ARCHIVE" "$BACKUP_DIR"
 
-# Clean up temp dir
 rm -rf "$BACKUP_DIR"
 
 echo ""
 echo "============================================================"
 echo "  Backup created: $ARCHIVE"
-echo "  Store it securely (KeePassXC attachment, Google Drive,"
-echo "  or USB stick). DELETE it after copying to the new Mac."
+echo "  Store securely (KeePassXC attachment, Google Drive, USB)."
+echo "  DELETE the zip after restoring it on the new Mac."
+echo "============================================================"
+echo ""
+echo "  Reminder: ~/Documents/ and ~/DEV/ai/generated-images/"
+echo "  are NOT included — back those up separately if needed."
 echo "============================================================"
