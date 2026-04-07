@@ -21,7 +21,7 @@ cd "${DOTFILEDIR}" || exit 1
 # 1. Symlinks                                                                 #
 ###############################################################################
 
-files=(zshrc zprofile aliases private p10k.zsh)
+files=(zshrc zprofile aliases private p10k.zsh npmrc)
 
 for file in "${files[@]}"; do
     if [ -f "${DOTFILEDIR}/.${file}" ]; then

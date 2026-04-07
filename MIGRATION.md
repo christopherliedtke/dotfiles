@@ -26,7 +26,14 @@ git commit -m "Add Raycast backup"
 git push
 ```
 
-### 3. Back up anything else not in this repo
+### 3. Back up secrets and dev project files
+Run the backup script — it collects all `.env` files plus CLI credentials into an encrypted zip:
+```bash
+cd ~/dotfiles && ./backup-envs.sh
+```
+Store the resulting zip securely (KeePassXC attachment or USB stick). Delete it after copying to the new Mac.
+
+### 4. Back up anything else not in this repo
 - Browser bookmarks — export from Chrome/Zen
 - KeePassXC database — should already be in Google Drive
 - Joplin notes — sync first from within the Joplin app
@@ -319,6 +326,126 @@ git push
 | `tut_env` | Activate Python tutorial venv |
 | `wipe_env` | Recreate Python tutorial venv |
 | `yt` / `cyt` / `oyt` | YouTube Scripts folder shortcuts |
+
+---
+
+## Dev Projects Migration
+
+Everything below lives outside the dotfiles repo and must be handled manually.
+
+### Dev projects (the code)
+
+Your projects are already in git — just clone them on the new Mac:
+
+```bash
+mkdir -p ~/DEV/projects ~/DEV/ai ~/DEV/mcp-servers
+cd ~/DEV/projects
+git clone git@github.com:christopherliedtke/mfa-mal-anders-nextjs.git
+# repeat for each project
+```
+
+Use `gh repo list christopherliedtke --limit 50` to get a full list of your repos.
+
+### .env files (the critical part)
+
+`.env` files are gitignored and **will not** be in the cloned repos. You currently have 23 of them across `~/DEV`. The `backup-envs.sh` script (run on the old Mac) backs them all up.
+
+On the new Mac, unzip the backup and copy them back:
+
+```bash
+# Unzip with the password you set during backup
+unzip env-backup-YYYY-MM-DD.zip -d /tmp/env-restore
+
+# Then for each project, copy the relevant .env files, e.g.:
+cp /tmp/env-restore/DEV/projects/mfa-mal-anders-nextjs/.env.local \
+   ~/DEV/projects/mfa-mal-anders-nextjs/
+
+# Clean up when done
+rm -rf /tmp/env-restore
+```
+
+Your projects and their env files:
+
+| Project | Env files |
+|---------|-----------|
+| `mfa-mal-anders-nextjs` | `.env.local`, `.env.test`, `bru_mfa-mal-anders/.env` |
+| `mfa-mal-anders-vuejobboard` | `.env`, `.env.dev`, `.env.local`, `client/.env.development.local`, `client/.env.production.local` |
+| `zfa-mal-anders` | `.env.development`, `.env.local`, `.env.production`, `.env.test`, `bru_zfa-mal-anders/.env` |
+| `arzt-mal-anders-vuejobboard` | `.env` |
+| `praxis-website-builder` | `.env` |
+| `maurerwerk-leipzig` | `.env.local` |
+| `sexpiration` | `.env` |
+| `ZuckerRede.de` | `.env` |
+| `DEV/ai/mfa-mal-anders` | `.env` |
+
+### AWS credentials
+
+The backup script copies `~/.aws/`. On the new Mac, restore it:
+
+```bash
+cp -r /tmp/env-restore/.aws ~/
+chmod 600 ~/.aws/credentials
+```
+
+Verify with: `aws sts get-caller-identity`
+
+### Stripe CLI
+
+The backup script copies `~/.config/stripe/config.toml`. On the new Mac:
+
+```bash
+mkdir -p ~/.config/stripe
+cp /tmp/env-restore/.config/stripe/config.toml ~/.config/stripe/
+```
+
+Verify with: `stripe config --list`
+
+### GitHub CLI (`gh`)
+
+Re-authenticate on the new Mac — the token is stored in the macOS Keychain and won't transfer:
+
+```bash
+gh auth login
+```
+
+The `ssh.sh` script handles this automatically during setup.
+
+### Node versions (nodenv)
+
+`brew.sh` installs Node 22 LTS. If your projects need older versions, install them:
+
+```bash
+nodenv install 20.10.0
+nodenv install 18.17.0
+# etc. — check .nvmrc or .node-version in each project
+```
+
+### pnpm global packages
+
+`brew.sh` reinstalls these automatically:
+- `vercel`
+- `eslint`
+- `@agentmail/cli`
+- `agentmail-cli`
+
+### Shell history
+
+The backup script includes `~/.zsh_history`. On the new Mac:
+
+```bash
+cp /tmp/env-restore/.zsh_history ~/.zsh_history
+```
+
+Open a new terminal tab to load it.
+
+### cmux workspaces
+
+cmux stores session state (open tabs, directories) locally — it won't transfer. You'll need to re-open your project workspaces manually after cloning. The workspace names and colors from your session:
+
+| Workspace | Project |
+|-----------|---------|
+| MfaMalAnders_Code | `~/DEV/projects/mfa-mal-anders-nextjs` |
+| _(others)_ | Re-create from your project list |
 
 ---
 

@@ -36,6 +36,7 @@ See [MIGRATION.md](MIGRATION.md) for the full step-by-step guide including what 
 | `brew.sh` | Homebrew formulae, apps, fonts, Oh My Zsh, nodenv, git config |
 | `ssh.sh` | SSH key generation + GitHub upload via `gh` CLI |
 | `vscode.sh` | Extensions + settings for VS Code and Cursor |
+| `backup-envs.sh` | Run on old Mac — backs up all `.env` files + CLI credentials to encrypted zip |
 
 ### Shell
 
@@ -45,6 +46,7 @@ See [MIGRATION.md](MIGRATION.md) for the full step-by-step guide including what 
 | `.zprofile` | Login shell — Homebrew PATH |
 | `.aliases` | Shortcuts for git, ls, brew, Finder, screencasting, Python venvs |
 | `.p10k.zsh` | Powerlevel10k prompt config |
+| `.npmrc` | npm config (ignore-scripts, save-exact, min-release-age) |
 | `.private` | Local secrets, not tracked (create manually) |
 
 ### Settings

@@ -142,12 +142,24 @@ if [ ! -d "$HOME/venvs/tutorial" ]; then
 fi
 
 ###############################################################################
-# Global npm tool                                                             #
+# Global npm/pnpm tools                                                       #
 ###############################################################################
 
 # Use full path so we get the nodenv-managed npm, not any system npm
 NODE_BIN="$HOME/.nodenv/versions/$LATEST_LTS/bin"
 "$NODE_BIN/npm" install --global prettier
+
+# pnpm global packages
+pnpm_globals=(
+    "vercel"
+    "eslint"
+    "@agentmail/cli"
+    "agentmail-cli"
+)
+for pkg in "${pnpm_globals[@]}"; do
+    echo "Installing pnpm global: $pkg..."
+    pnpm add -g "$pkg"
+done
 
 ###############################################################################
 # macOS Applications (Casks)                                                  #
