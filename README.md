@@ -60,9 +60,9 @@ See [MIGRATION.md](MIGRATION.md) for the full step-by-step guide including what 
 
 ## Key Tools Installed
 
-**CLI:** zsh, git, gh, python, nodenv, pnpm, uv, ripgrep, awscli, heroku, stripe, mongosh, redis, mas
+**CLI:** zsh, git, gh, python, nodenv, pnpm, uv, ripgrep, awscli, stripe, mongosh, redis, mas
 
-**Apps:** Cursor, VS Code, iTerm2, cmux, Chrome, Zen Browser, Raycast, Slack, Figma, Postman, Bruno, Joplin, Asana, Spark, KeePassXC, Spotify, GIMP, VLC, and more
+**Apps:** Cursor, VS Code, iTerm2, cmux, Chrome, Zen Browser, Raycast, Slack, Figma, Postman, Bruno, Joplin, Asana, Spark, KeePassXC, Spotify, and more
 
 **Fonts:** Meslo LG Nerd Font (for powerlevel10k), Source Code Pro
 

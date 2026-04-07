@@ -97,7 +97,7 @@ Requires `sudo` for some settings. Kills Dock, Finder, and SystemUIServer at the
 | `python`, `nodenv`, `node-build` | Languages |
 | `uv` | Fast Python package manager |
 | `pnpm` | Node package manager |
-| `awscli`, `heroku`, `stripe` | Cloud & services |
+| `awscli`, `stripe` | Cloud & services |
 | `mongosh`, `redis` | Databases |
 | `openssl@3` | Security |
 | `mas` | Mac App Store CLI |
@@ -122,8 +122,6 @@ Requires `sudo` for some settings. Kills Dock, Finder, and SystemUIServer at the
 | Spark (Readdle) | Email |
 | Figma | Design |
 | Spotify | Music |
-| VLC | Video player |
-| GIMP | Image editing |
 | Raycast | Launcher + window management |
 | Google Drive | File sync |
 | Maccy | Clipboard manager |

@@ -60,7 +60,6 @@ packages=(
 
     # Cloud & services
     "awscli"
-    "heroku"
     "stripe"
 
     # Database
@@ -180,8 +179,6 @@ apps=(
 
     # Media & entertainment
     "spotify"
-    "vlc"
-    "gimp"
 
     # Utilities
     "raycast"             # Launcher & window management
