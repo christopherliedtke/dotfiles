@@ -4,6 +4,7 @@
 # macOS Setup – Main Entry Point
 #
 # Runs in order:
+#   0. Pre-flight checks (architecture, Rosetta)
 #   1. Symlinks dotfiles to $HOME
 #   2. macOS system preferences (macOS.sh)
 #   3. Homebrew packages & apps (brew.sh)
@@ -17,6 +18,42 @@ DOTFILEDIR="${HOME}/dotfiles"
 
 echo "Changing to ${DOTFILEDIR}..."
 cd "${DOTFILEDIR}" || exit 1
+
+###############################################################################
+# 0. Pre-flight checks                                                        #
+###############################################################################
+
+echo ""
+echo "── Pre-flight checks ──"
+
+# Verify running on Apple Silicon natively (not under Rosetta)
+ARCH=$(uname -m)
+if [ "$ARCH" != "arm64" ]; then
+    echo "WARNING: Running as $ARCH — expected arm64."
+    echo "If this terminal is set to 'Open using Rosetta', disable that first."
+    echo "Check: Activity Monitor → this process → Kind should be 'Apple'."
+    echo "Press enter to continue anyway, or Ctrl+C to abort..."
+    read
+else
+    echo "✓ Architecture: arm64"
+fi
+
+# Install Rosetta 2 (needed for some x86-only tools and installers)
+if ! /usr/bin/pgrep oahd >/dev/null 2>&1; then
+    echo "Installing Rosetta 2..."
+    softwareupdate --install-rosetta --agree-to-license
+else
+    echo "✓ Rosetta 2 already installed"
+fi
+
+echo ""
+echo "ACTION REQUIRED — grant Full Disk Access to your terminals before continuing:"
+echo "  System Settings → Privacy & Security → Full Disk Access"
+echo "  Enable: iTerm2, Cursor, Visual Studio Code"
+echo "  (Without this, file operations in the integrated terminal will fail silently)"
+echo ""
+echo "Press enter when done..."
+read
 
 ###############################################################################
 # 1. Symlinks                                                                 #
@@ -91,9 +128,36 @@ cp "${DOTFILEDIR}/settings/cursor-mcp.json" "$HOME/.cursor/mcp.json"
 
 echo "AI tool configs restored."
 
+###############################################################################
+# Post-install verification                                                   #
+###############################################################################
+
+echo ""
+echo "── Verifying binary architectures ──"
+for bin in brew node python3 git; do
+    path=$(command -v $bin 2>/dev/null)
+    if [ -n "$path" ]; then
+        arch_info=$(file "$path" | grep -o "arm64\|x86_64" | head -1)
+        if [ "$arch_info" = "arm64" ]; then
+            echo "  ✓ $bin → $path ($arch_info)"
+        else
+            echo "  ✗ $bin → $path ($arch_info) — WRONG ARCHITECTURE"
+        fi
+    else
+        echo "  ? $bin not found"
+    fi
+done
+
 echo ""
 echo "============================================================"
 echo "  Installation complete!"
-echo "  Restart your terminal (or open a new tab) to apply all"
-echo "  shell changes."
+echo "  Restart your terminal to apply all shell changes."
+echo ""
+echo "  NEXT STEPS:"
+echo "  1. Restore from your env-backup zip (see MIGRATION.md)"
+echo "  2. Clone your dev repos into ~/DEV"
+echo "  3. Sign in to apps: Slack, Spotify, Figma, Joplin, Asana"
+echo "  4. Import Raycast settings"
+echo "  5. Set iTerm2 'dotfiles' profile as default"
+echo "  6. Sign in to GitHub Copilot in Cursor/VS Code"
 echo "============================================================"

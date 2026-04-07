@@ -561,6 +561,97 @@ Re-login with your NordVPN account credentials after installing.
 
 ---
 
+## Common Migration Pitfalls
+
+Things that commonly go wrong for developers migrating to a new Mac — especially on Apple Silicon / macOS Sequoia.
+
+### Terminal running under Rosetta (silent architecture contamination)
+
+**The most dangerous mistake.** If your terminal is set to "Open using Rosetta", every tool you install (Homebrew, Node, Python) installs as x86_64 instead of arm64. Everything appears to work but performance is worse and some tools silently misbehave.
+
+`install.sh` checks this automatically, but verify manually:
+```bash
+uname -m          # must return: arm64
+file $(which brew) # must contain: arm64
+file $(which node) # must contain: arm64
+```
+
+If Activity Monitor shows the terminal process as Kind: "Intel" instead of "Apple", that's Rosetta mode. Fix: close the terminal, Get Info on the app, uncheck "Open using Rosetta".
+
+### Full Disk Access not granted to terminals
+
+macOS TCC blocks Terminal, iTerm2, Cursor, and VS Code integrated terminals from reading `~/Documents`, `~/Desktop`, `~/Downloads`, and other protected paths without explicit permission.
+
+**System Settings → Privacy & Security → Full Disk Access → enable iTerm2, Cursor, VS Code**
+
+This is per-app — granting it to iTerm2 does NOT apply to Cursor's terminal. Do all three.
+Without it, file operations in integrated terminals fail silently or with confusing "Operation not permitted" errors.
+
+### Xcode CLT breaks after every macOS major update
+
+After upgrading macOS (e.g. 14→15), `git`, `make`, `clang`, and `brew update` all break with:
+```
+xcrun: error: invalid active developer path
+```
+Fix: `xcode-select --install` — you need to re-run this after every major macOS version bump, not just on a new machine.
+
+### SSH key permissions wrong after restore
+
+If you restore `~/.ssh/` from the backup zip, the permissions must be exact or SSH silently refuses to use the keys:
+```bash
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_ed25519
+chmod 644 ~/.ssh/id_ed25519.pub
+chmod 600 ~/.ssh/config
+```
+Verify with: `ssh -T git@github.com` — should say "Hi username!"
+
+### SSH keys not persisting across reboots (macOS Sequoia)
+
+Sequoia changed how the SSH agent interacts with the Keychain. After a reboot, keys may not be loaded. The `~/.ssh/config` in your dotfiles already has `UseKeychain yes` and `AddKeysToAgent yes` which handles this — but if git suddenly asks for a passphrase, re-add the key:
+```bash
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+```
+
+### nodenv globals lost after installing a new Node version
+
+Each Node version managed by nodenv has its own isolated global package directory. Installing a new version and setting it as global means all previous globals (eslint, prettier, vercel, etc.) are gone from that version.
+
+`brew.sh` handles the initial install, but if you add a new nodenv version later:
+```bash
+nodenv install 20.10.0
+nodenv global 20.10.0
+npm install -g prettier vercel eslint  # reinstall globals
+```
+
+### pnpm + Homebrew + Corepack conflict
+
+`brew install pnpm` and `corepack enable` both try to manage the `pnpm` binary and conflict. Your setup installs pnpm via Homebrew — do NOT run `corepack enable pnpm` or it will fight with the Homebrew version. Stick to one or the other.
+
+### Gatekeeper blocks unsigned CLI tools (Sequoia)
+
+In Sequoia, `spctl --master-disable` no longer fully disables Gatekeeper. Unsigned binaries downloaded from GitHub releases must be approved individually:
+
+**System Settings → Privacy & Security → scroll to bottom → "Open Anyway"**
+
+This cannot be scripted. Tools installed via Homebrew are notarized and not affected.
+
+### macOS Sequoia 15.0 broke VPN and networking tools
+
+The initial Sequoia 15.0 release broke VPN clients and security tools (NordVPN, CrowdStrike, etc.) due to networking stack changes. **Update to 15.0.1 or later before starting the migration setup** — otherwise NordVPN and other network tools may silently fail after install.
+
+```bash
+# Check your macOS version before starting:
+sw_vers -productVersion
+# Should be 15.0.1 or higher
+```
+
+### VS Code / Cursor integrated terminal doesn't source `.zprofile`
+
+Cursor and VS Code open terminals as interactive non-login shells — `.zprofile` is not sourced. Your `.zshrc` already handles this correctly (all PATH inits are in `.zshrc`), but if you ever notice `brew`, `node`, or `python3` not found in the integrated terminal, this is why.
+
+---
+
 ## Troubleshooting
 
 **Homebrew not found after install:**
