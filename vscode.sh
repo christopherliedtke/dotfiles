@@ -1,75 +1,117 @@
 #!/usr/bin/env zsh
 
-# Check if Homebrew's bin exists and if it's not already in the PATH
-if [ -x "/opt/homebrew/bin/brew" ] && [[ ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
-    export PATH="/opt/homebrew/bin:$PATH"
-fi
+# Ensure Homebrew is in PATH for this session
+eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
 
-# Install VS Code Extensions
+###############################################################################
+# VS Code Extensions                                                          #
+###############################################################################
+
 extensions=(
-    # ms-python.python
-    # ms-python.pylint
-    # ms-python.vscode-pylance
-    # ms-python.debugpy
-    # GitHub.copilot
-    # ms-vscode.Theme-PredawnKit
-    # teabyii.ayu
-    # formulahendry.code-runner
-    # esbenp.prettier-vscode
-    # znck.grammarly
-    aaron-bond.better-comments
-    formulahendry.auto-rename-tag
-    mikestead.dotenv
-    dbaeumer.vscode-eslint
-    github.vscode-github-actions
+    # AI
+    github.copilot
+    github.copilot-chat
+
+    # Git
     eamodio.gitlens
-    kisstkondoros.vscode-gutter-preview
-    wix.vscode-import-cost
-    zignd.html-css-class-completion
-    ritwickdey.liveserver
-    pkief.material-icon-theme
-    cardinal90.multi-cursor-case-preserve
-    sdras.night-owl
-    christian-kohler.path-intellisense
+    github.vscode-github-actions
+
+    # Code quality & formatting
     esbenp.prettier-vscode
+    dbaeumer.vscode-eslint
+    aaron-bond.better-comments
+
+    # HTML / CSS
+    formulahendry.auto-rename-tag
+    zignd.html-css-class-completion
+    bradlc.vscode-tailwindcss
+
+    # JavaScript / TypeScript
+    wix.vscode-import-cost
     yoavbls.pretty-ts-errors
+    cardinal90.multi-cursor-case-preserve
+    alduncanson.react-hooks-snippets
+    conrad-hunter.next-ts-snippets
+
+    # GraphQL
+    graphql.vscode-graphql
+    graphql.vscode-graphql-syntax
+
+    # Database
+    mongodb.mongodb-vscode
     mechatroner.rainbow-csv
+
+    # Utilities
+    christian-kohler.path-intellisense
+    kisstkondoros.vscode-gutter-preview
+    ritwickdey.liveserver
+    mikestead.dotenv
+    alefragnani.project-manager
+    dakshmiglani.hex-to-rgba
+
+    # Theme & icons
+    sdras.night-owl
+    pkief.material-icon-theme
 )
 
-# Get a list of all currently installed extensions.
-installed_extensions=$(code --list-extensions)
-
-for extension in "${extensions[@]}"; do
-    if echo "$installed_extensions" | grep -qi "^$extension$"; then
-        echo "$extension is already installed. Skipping..."
-    else
-        echo "Installing $extension..."
-        code --install-extension "$extension"
+install_extensions_for() {
+    local CMD=$1
+    if ! command -v "$CMD" &>/dev/null; then
+        echo "$CMD not found. Skipping extension install for $CMD."
+        return
     fi
-done
+    local installed
+    installed=$("$CMD" --list-extensions 2>/dev/null)
+    for ext in "${extensions[@]}"; do
+        if echo "$installed" | grep -qi "^${ext}\$"; then
+            echo "$ext already installed in $CMD. Skipping..."
+        else
+            echo "Installing $ext in $CMD..."
+            "$CMD" --install-extension "$ext"
+        fi
+    done
+}
 
-echo "VS Code extensions have been installed."
+echo "--- Installing VS Code extensions ---"
+install_extensions_for "code"
 
-# Define the target directory for VS Code user settings on macOS
-VSCODE_USER_SETTINGS_DIR="${HOME}/Library/Application Support/Code/User/"
+echo "--- Installing Cursor extensions ---"
+install_extensions_for "cursor"
 
-# Check if VS Code settings directory exists
-if [ -d "$VSCODE_USER_SETTINGS_DIR" ]; then
-    # Backup existing settings.json and keybindings.json, if they exist
-    cp "${VSCODE_USER_SETTINGS_DIR}/settings.json" "${VSCODE_USER_SETTINGS_DIR}/settings.json.backup"
-    cp "${VSCODE_USER_SETTINGS_DIR}/keybindings.json" "${VSCODE_USER_SETTINGS_DIR}/keybindings.json.backup"
+###############################################################################
+# VS Code Settings                                                            #
+###############################################################################
 
-    # Copy your custom settings.json and keybindings.json to the VS Code settings directory
-    cp "settings/VSCode-Settings.json" "${VSCODE_USER_SETTINGS_DIR}/settings.json"
-    cp "settings/VSCode-Keybindings.json" "${VSCODE_USER_SETTINGS_DIR}/keybindings.json"
+copy_settings() {
+    local SETTINGS_DIR=$1
+    if [ -d "$SETTINGS_DIR" ]; then
+        [ -f "$SETTINGS_DIR/settings.json" ] && \
+            cp "$SETTINGS_DIR/settings.json" "$SETTINGS_DIR/settings.json.backup"
+        [ -f "$SETTINGS_DIR/keybindings.json" ] && \
+            cp "$SETTINGS_DIR/keybindings.json" "$SETTINGS_DIR/keybindings.json.backup"
 
-    echo "VS Code settings and keybindings have been updated."
-else
-    echo "VS Code user settings directory does not exist. Please ensure VS Code is installed."
-fi
+        cp "settings/VSCode-Settings.json" "$SETTINGS_DIR/settings.json"
+        cp "settings/VSCode-Keybindings.json" "$SETTINGS_DIR/keybindings.json"
+        echo "Settings copied to $SETTINGS_DIR"
+    else
+        echo "Settings dir not found: $SETTINGS_DIR (skipping)"
+    fi
+}
 
-# Open VS Code to sign-in to extensions
-code .
-echo "Login to extensions (Copilot, Grammarly, etc) within VS Code."
+VSCODE_DIR="$HOME/Library/Application Support/Code/User"
+CURSOR_DIR="$HOME/Library/Application Support/Cursor/User"
+
+echo "--- Copying VS Code settings ---"
+copy_settings "$VSCODE_DIR"
+
+echo "--- Copying Cursor settings ---"
+copy_settings "$CURSOR_DIR"
+
+###############################################################################
+# Manual steps                                                                #
+###############################################################################
+
+echo ""
+echo "Sign in to GitHub Copilot and any other extensions inside VS Code/Cursor."
 echo "Press enter to continue..."
 read

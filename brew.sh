@@ -1,161 +1,257 @@
 #!/usr/bin/env zsh
 
-# Install Homebrew if it isn't already installed
-if ! command -v brew &>/dev/null; then
-    echo "Homebrew not installed. Installing Homebrew."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+###############################################################################
+# Homebrew                                                                     #
+###############################################################################
 
-    # Attempt to set up Homebrew PATH automatically for this session
-    if [ -x "/opt/homebrew/bin/brew" ]; then
-        # For Apple Silicon Macs
-        echo "Configuring Homebrew in PATH for Apple Silicon Mac..."
-        export PATH="/opt/homebrew/bin:$PATH"
-    fi
-else
-    echo "Homebrew is already installed."
+# Install Homebrew if not already installed
+if ! command -v brew &>/dev/null; then
+    echo "Homebrew not installed. Installing..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# Verify brew is now accessible
 if ! command -v brew &>/dev/null; then
-    echo "Failed to configure Homebrew in PATH. Please add Homebrew to your PATH manually."
+    echo "ERROR: Homebrew could not be configured. Add it to PATH manually and re-run."
     exit 1
 fi
 
-# Update Homebrew and Upgrade any already-installed formulae
+# Always ensure brew is in PATH for this session (needed when re-running)
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 brew update
 brew upgrade
 brew upgrade --cask
 brew cleanup
 
-# Define an array of packages to install using Homebrew.
+###############################################################################
+# Formulae                                                                     #
+###############################################################################
+
 packages=(
-    "python"
-    "bash"
+    # Shell & core utilities
     "zsh"
+    "coreutils"
+    "wget"
+    "ripgrep"
+    "trash"
+    "mas"                 # Mac App Store CLI
+
+    # Zsh enhancements (sourced in .zshrc)
+    "zsh-syntax-highlighting"
+    "zsh-autosuggestions"
+    "zsh-history-substring-search"
+    "powerlevel10k"
+
+    # Version control
     "git"
-    "node"
+    "gh"                  # GitHub CLI
+
+    # Languages & runtimes
+    "python"
+    "nodenv"              # Node version manager
+    "node-build"          # nodenv plugin for installing Node versions
+
+    # Python tooling
+    "uv"                  # Fast Python package/project manager
+
+    # JavaScript tooling
+    "pnpm"
+
+    # Cloud & services
     "awscli"
-    "mongosh"
-    "node"
-    "nodenv"
-    "openssl@3"
-    "redis"
+    "heroku"
     "stripe"
+
+    # Database
+    "mongosh"
+    "redis"
+
+    # Security
+    "openssl@3"
 )
 
-# Loop over the array to install each application.
 for package in "${packages[@]}"; do
-    if brew list --formula | grep -q "^$package\$"; then
-        echo "$package is already installed. Skipping..."
+    if brew list --formula | grep -q "^${package}\$"; then
+        echo "$package already installed. Skipping..."
     else
         echo "Installing $package..."
         brew install "$package"
     fi
 done
 
-# Add the Homebrew zsh to allowed shells
-echo "Changing default shell to Homebrew zsh"
-echo "$(brew --prefix)/bin/zsh" | sudo tee -a /etc/shells >/dev/null
-# Set the Homebrew zsh as default shell
-chsh -s "$(brew --prefix)/bin/zsh"
+###############################################################################
+# Default shell → Homebrew zsh                                                #
+###############################################################################
 
-# Git config name
+BREW_ZSH="$(brew --prefix)/bin/zsh"
+if ! grep -qF "$BREW_ZSH" /etc/shells; then
+    echo "Adding Homebrew zsh to /etc/shells..."
+    echo "$BREW_ZSH" | sudo tee -a /etc/shells >/dev/null
+fi
+chsh -s "$BREW_ZSH"
+
+###############################################################################
+# Oh My Zsh                                                                   #
+###############################################################################
+
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "Installing Oh My Zsh..."
+    RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+    echo "Oh My Zsh already installed. Skipping..."
+fi
+
+###############################################################################
+# nodenv – set global Node version                                            #
+###############################################################################
+
+eval "$(nodenv init -)" 2>/dev/null || true
+LATEST_LTS="22.14.0"
+if ! nodenv versions | grep -q "$LATEST_LTS"; then
+    echo "Installing Node $LATEST_LTS via nodenv..."
+    nodenv install "$LATEST_LTS"
+fi
+nodenv global "$LATEST_LTS"
+nodenv rehash
+echo "Node global set to $LATEST_LTS"
+
+###############################################################################
+# Git global config                                                           #
+###############################################################################
+
 echo "Please enter your FULL NAME for Git configuration:"
 read git_user_name
-
-# Git config email
 echo "Please enter your EMAIL for Git configuration:"
 read git_user_email
 
-# Set my git credentials
-$(brew --prefix)/bin/git config --global user.name "$git_user_name"
-$(brew --prefix)/bin/git config --global user.email "$git_user_email"
+git config --global user.name "$git_user_name"
+git config --global user.email "$git_user_email"
+git config --global init.defaultBranch main
+git config --global core.ignoreCase false
+git config --global pull.rebase false
+echo "Git global config set."
 
-# Create the tutorial virtual environment I use frequently
-$(brew --prefix)/bin/python3 -m venv "${HOME}/tutorial"
+###############################################################################
+# Python virtual environment                                                  #
+###############################################################################
 
-# Install Prettier, which I use in both VS Code and Sublime Text
-$(brew --prefix)/bin/npm install --global prettier
+if [ ! -d "$HOME/venvs/tutorial" ]; then
+    echo "Creating tutorial Python venv at ~/venvs/tutorial..."
+    mkdir -p "$HOME/venvs"
+    python3 -m venv "$HOME/venvs/tutorial"
+fi
 
-# Define an array of applications to install using Homebrew Cask.
+###############################################################################
+# Global npm tool                                                             #
+###############################################################################
+
+# Use full path so we get the nodenv-managed npm, not any system npm
+NODE_BIN="$HOME/.nodenv/versions/$LATEST_LTS/bin"
+"$NODE_BIN/npm" install --global prettier
+
+###############################################################################
+# macOS Applications (Casks)                                                  #
+###############################################################################
+
 apps=(
+    # Browsers
     "google-chrome"
+    "zen-browser"
+    "helium-browser"      # Floating browser window
+
+    # Development
     "visual-studio-code"
-    "spotify"
-    "google-drive"
-    "gimp"
-    "vlc"
-    "rectangle"
+    "cursor"              # AI-first editor (primary IDE)
+    "iterm2"
+    "cmux"                # Terminal multiplexer manager
     "postman"
+    "bruno"               # API client
+
+    # AI tools
+    "claude-code"
+
+    # Productivity & work
     "asana"
-    "cheatsheet"
-    "figma"
-    "joplin"
-    "keepassxc"
-    "maccy"
+    "joplin"              # Notes
     "microsoft-office"
-    "slask"
+    "readdle-spark"       # Email
+    "figma"
+
+    # Media & entertainment
+    "spotify"
+    "vlc"
+    "gimp"
+
+    # Utilities
+    "raycast"             # Launcher & window management
+    "google-drive"
+    "maccy"               # Clipboard manager
+    "cheatsheet"
+    "keepassxc"           # Password manager
     "tor-browser"
+    "slack"
 )
 
-# Loop over the array to install each application.
 for app in "${apps[@]}"; do
-    if brew list --cask | grep -q "^$app\$"; then
-        echo "$app is already installed. Skipping..."
+    if brew list --cask | grep -q "^${app}\$"; then
+        echo "$app already installed. Skipping..."
     else
         echo "Installing $app..."
         brew install --cask "$app"
     fi
 done
 
-# Install Source Code Pro Font
-# Tap the Homebrew font cask repository if not already tapped
-brew tap | grep -q "^homebrew/cask-fonts$" || brew tap homebrew/cask-fonts
+###############################################################################
+# Fonts                                                                       #
+###############################################################################
 
-# Define the font name
-font_name="font-source-code-pro"
+# cask-fonts tap is deprecated; fonts are now in the main homebrew/cask registry
+fonts=(
+    "font-meslo-lg-nerd-font"   # Required for powerlevel10k + iTerm2 profile
+    "font-source-code-pro"
+)
 
-# Check if the font is already installed
-if brew list --cask | grep -q "^$font_name\$"; then
-    echo "$font_name is already installed. Skipping..."
-else
-    echo "Installing $font_name..."
-    brew install --cask "$font_name"
-fi
+for font in "${fonts[@]}"; do
+    if brew list --cask | grep -q "^${font}\$"; then
+        echo "$font already installed. Skipping..."
+    else
+        echo "Installing $font..."
+        brew install --cask "$font"
+    fi
+done
 
-# Once font is installed, Import your Terminal Profile
-echo "Import your terminal settings..."
-echo "Terminal -> Settings -> Profiles -> Import..."
-echo "Import from ${HOME}/dotfiles/settings/Pro.terminal"
-echo "Press enter to continue..."
-read
+###############################################################################
+# Final cleanup                                                               #
+###############################################################################
 
-# Update and clean up again for safe measure
 brew update
 brew upgrade
 brew upgrade --cask
 brew cleanup
 
-echo "Sign in to Google Chrome. Press enter to continue..."
-read
+###############################################################################
+# Manual steps                                                                #
+###############################################################################
 
-echo "Sign in to Google Drive. Press enter to continue..."
-read
-
-echo "Sign in to Spotify. Press enter to continue..."
-read
-
-echo "Open Rectangle and give it necessary permissions. Press enter to continue..."
-read
-
-echo "Import your Rectangle settings located in ~/dotfiles/settings/RectangleConfig.json. Press enter to continue..."
-read
-
-echo "Sign in to joplin and sync data. Press enter to continue..."
-read
-
-echo "Sign in to asana. Press enter to continue..."
-read
-
-echo "Sign in to figma. Press enter to continue..."
+echo ""
+echo "============================================================"
+echo "  MANUAL STEPS REMAINING"
+echo "============================================================"
+echo ""
+echo "1. iTerm2 profile: already applied via DynamicProfiles."
+echo "   Open iTerm2, go to Preferences → Profiles and set 'dotfiles' as default."
+echo ""
+echo "2. Raycast: Open Raycast → Settings → Advanced → Import"
+echo "   File: ~/dotfiles/settings/Raycast.rayconfig (if exported before migration)"
+echo ""
+echo "3. Sign in to apps:"
+echo "   - Google Chrome & Google Drive"
+echo "   - Spotify"
+echo "   - Joplin (sync your notes)"
+echo "   - Asana"
+echo "   - Figma"
+echo "   - Slack workspaces"
+echo ""
+echo "Press enter to continue to VS Code setup..."
 read
