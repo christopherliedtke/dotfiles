@@ -529,9 +529,9 @@ Not worth migrating; Redis will create a fresh one on the new Mac.
 
 ### macOS Keychain
 
-Passwords saved in Safari, system wifi passwords, and some app tokens are stored in the macOS Keychain. These **do not** transfer automatically unless you use Migration Assistant.
+iCloud Keychain is enabled — passwords, wifi passwords, and certificates sync automatically to the new Mac as soon as you sign in with your Apple ID. Nothing to do here.
 
-Notable items that need re-authentication on the new Mac:
+Items that still need re-authentication regardless (tokens, not passwords):
 - GitHub CLI (`gh auth login`)
 - Stripe CLI (restored from backup)
 - Any browser-saved passwords (sync via Chrome or export from Safari)
