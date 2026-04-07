@@ -174,7 +174,6 @@ apps=(
     "asana"
     "joplin"              # Notes
     "microsoft-office"
-    "readdle-spark"       # Email
     "figma"
 
     # Media & entertainment
@@ -183,7 +182,6 @@ apps=(
     # Utilities
     "raycast"             # Launcher & window management
     "google-drive"
-    "maccy"               # Clipboard manager
     "cheatsheet"
     "keepassxc"           # Password manager
     "tor-browser"

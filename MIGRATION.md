@@ -119,12 +119,10 @@ Requires `sudo` for some settings. Kills Dock, Finder, and SystemUIServer at the
 | Asana | Project management |
 | Joplin | Notes |
 | Microsoft Office | Office suite |
-| Spark (Readdle) | Email |
 | Figma | Design |
 | Spotify | Music |
 | Raycast | Launcher + window management |
 | Google Drive | File sync |
-| Maccy | Clipboard manager |
 | CheatSheet | Keyboard shortcut helper |
 | KeePassXC | Password manager |
 | Tor Browser | Private browsing |
