@@ -64,7 +64,18 @@ packages=(
 
     # Database
     "mongosh"
+    "mongodb/brew/mongodb-database-tools"
     "redis"
+
+    # AI tools
+    "ollama"
+    "opencode"
+    "gemini-cli"
+    "agent-browser"
+
+    # Git utilities
+    "bfg"                 # Git history cleaner
+    "git-filter-repo"     # Advanced git history rewriting
 
     # Security
     "openssl@3"

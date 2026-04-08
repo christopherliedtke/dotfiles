@@ -105,7 +105,9 @@ Requires `sudo` for some settings. Kills Dock, Finder, and SystemUIServer at the
 | `uv` | Fast Python package manager |
 | `pnpm` | Node package manager |
 | `awscli`, `stripe` | Cloud & services |
-| `mongosh`, `redis` | Databases |
+| `mongosh`, `mongodb-database-tools`, `redis` | Databases |
+| `ollama`, `opencode`, `gemini-cli`, `agent-browser` | AI tools |
+| `bfg`, `git-filter-repo` | Git history rewriting |
 | `openssl@3` | Security |
 | `mas` | Mac App Store CLI |
 
