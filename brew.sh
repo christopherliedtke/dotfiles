@@ -205,6 +205,7 @@ apps=(
 
     # Utilities
     "raycast"             # Launcher & window management
+    "wispr-flow"          # Voice dictation
     "google-drive"
     "cheatsheet"
     "keepassxc"           # Password manager
