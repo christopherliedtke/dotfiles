@@ -76,6 +76,7 @@ packages=(
     # Git utilities
     "bfg"                 # Git history cleaner
     "git-filter-repo"     # Advanced git history rewriting
+    "coderabbit"          # AI code review CLI
 
     # Security
     "openssl@3"

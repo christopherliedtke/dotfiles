@@ -108,6 +108,7 @@ Requires `sudo` for some settings. Kills Dock, Finder, and SystemUIServer at the
 | `mongosh`, `mongodb-database-tools`, `redis` | Databases |
 | `ollama`, `opencode`, `gemini-cli`, `agent-browser` | AI tools |
 | `bfg`, `git-filter-repo` | Git history rewriting |
+| `coderabbit` | AI code review CLI |
 | `openssl@3` | Security |
 | `mas` | Mac App Store CLI |
 
