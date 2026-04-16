@@ -190,6 +190,7 @@ apps=(
     "cmux"                # Terminal multiplexer manager
     "postman"
     "bruno"               # API client
+    "commander-one"       # File manager
 
     # AI tools
     "claude-code"
