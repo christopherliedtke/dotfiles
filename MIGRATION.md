@@ -195,10 +195,13 @@ Installs extensions in **both VS Code and Cursor**:
 
 | Extension | Purpose |
 |-----------|---------|
-| `github.copilot` + `copilot-chat` | AI coding |
+| `anthropic.claude-code` | AI coding |
+| `highagency.pencildev` | AI design tool |
 | `eamodio.gitlens` | Git superpowers |
+| `github.vscode-github-actions` | GitHub Actions |
 | `esbenp.prettier-vscode` | Code formatting |
 | `dbaeumer.vscode-eslint` | Linting |
+| `biomejs.biome` | Fast linter & formatter |
 | `aaron-bond.better-comments` | Comment highlighting |
 | `formulahendry.auto-rename-tag` | HTML tag rename |
 | `bradlc.vscode-tailwindcss` | Tailwind CSS |
@@ -206,18 +209,22 @@ Installs extensions in **both VS Code and Cursor**:
 | `wix.vscode-import-cost` | Show import sizes |
 | `yoavbls.pretty-ts-errors` | Readable TS errors |
 | `cardinal90.multi-cursor-case-preserve` | Multi-cursor case |
-| `alduncanson.react-hooks-snippets` | React hooks |
-| `conrad-hunter.next-ts-snippets` | Next.js snippets |
-| `graphql.vscode-graphql` + syntax | GraphQL |
+| `prisma.prisma` | Prisma ORM |
+| `shd101wyy.markdown-preview-enhanced` | Markdown preview |
+| `unifiedjs.vscode-mdx` | MDX support |
 | `mongodb.mongodb-vscode` | MongoDB |
-| `alefragnani.project-manager` | Workspace switching |
+| `mechatroner.rainbow-csv` | CSV highlighting |
+| `christian-kohler.path-intellisense` | Path autocomplete |
+| `kisstkondoros.vscode-gutter-preview` | Image preview in gutter |
+| `ritwickdey.liveserver` | Local dev server |
+| `mikestead.dotenv` | .env syntax |
+| `dakshmiglani.hex-to-rgba` | Color conversion |
 | `sdras.night-owl` | Theme |
 | `pkief.material-icon-theme` | File icons |
-| + more | See `vscode.sh` |
 
 Also copies `settings/VSCode-Settings.json` and `settings/VSCode-Keybindings.json` to both editors.
 
-After install: sign in to **GitHub Copilot** inside VS Code or Cursor.
+After install: sign in to extensions that require authentication inside VS Code or Cursor.
 
 ---
 
