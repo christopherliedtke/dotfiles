@@ -108,7 +108,26 @@ cp "${DOTFILEDIR}/settings/iTerm2-Profile.json" "$ITERM_DYNPROFILES/dotfiles.jso
 echo "iTerm2 profile installed. Open iTerm2 → Preferences → Profiles to set it as default."
 
 ###############################################################################
-# 6. VS Code + Cursor                                                         #
+# 6. Zen Browser UI config                                                     #
+###############################################################################
+
+echo ""
+echo "Restoring Zen Browser UI config..."
+# Find the default-release profile directory
+ZEN_PROFILES="$HOME/Library/Application Support/zen/Profiles"
+ZEN_PROFILE=$(find "$ZEN_PROFILES" -maxdepth 1 -name "*.Default (release)" -type d 2>/dev/null | head -1)
+if [ -n "$ZEN_PROFILE" ]; then
+    mkdir -p "$ZEN_PROFILE/chrome/zen-themes"
+    cp "${DOTFILEDIR}/settings/zen-browser/chrome/zen-themes.css" "$ZEN_PROFILE/chrome/"
+    cp -r "${DOTFILEDIR}/settings/zen-browser/chrome/zen-themes/" "$ZEN_PROFILE/chrome/zen-themes/"
+    cp "${DOTFILEDIR}/settings/zen-browser/xulstore.json" "$ZEN_PROFILE/"
+    echo "Zen Browser UI config restored to $ZEN_PROFILE"
+else
+    echo "Zen Browser profile not found. Open Zen Browser once first, then re-run this step."
+fi
+
+###############################################################################
+# 7. VS Code + Cursor                                                         #
 ###############################################################################
 
 echo ""
@@ -116,7 +135,7 @@ echo "Setting up VS Code and Cursor..."
 zsh ./vscode.sh
 
 ###############################################################################
-# 7. AI tool configs                                                          #
+# 8. AI tool configs                                                          #
 ###############################################################################
 
 echo ""
