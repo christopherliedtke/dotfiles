@@ -121,6 +121,7 @@ if [ -n "$ZEN_PROFILE" ]; then
     cp "${DOTFILEDIR}/settings/zen-browser/chrome/zen-themes.css" "$ZEN_PROFILE/chrome/"
     cp -r "${DOTFILEDIR}/settings/zen-browser/chrome/zen-themes/" "$ZEN_PROFILE/chrome/zen-themes/"
     cp "${DOTFILEDIR}/settings/zen-browser/xulstore.json" "$ZEN_PROFILE/"
+    cp "${DOTFILEDIR}/settings/zen-browser/user.js" "$ZEN_PROFILE/"
     echo "Zen Browser UI config restored to $ZEN_PROFILE"
 else
     echo "Zen Browser profile not found. Open Zen Browser once first, then re-run this step."
