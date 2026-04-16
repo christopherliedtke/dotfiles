@@ -1,10 +1,14 @@
 #!/usr/bin/env zsh
 
-xcode-select --install
-
-echo "Complete the installation of Xcode Command Line Tools before proceeding."
-echo "Press enter to continue..."
-read
+# Install Xcode CLT only if not already installed
+if ! xcode-select -p &>/dev/null; then
+    xcode-select --install
+    echo "Complete the installation of Xcode Command Line Tools before proceeding."
+    echo "Press enter to continue..."
+    read
+else
+    echo "✓ Xcode Command Line Tools already installed"
+fi
 
 # Ask for the administrator password upfront
 sudo -v
@@ -70,7 +74,7 @@ defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Remove duplicates in the “Open With” menu (also see `lscleanup` alias)
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user 2>/dev/null
 
 # Display ASCII control characters using caret notation in standard text views
 # Try e.g. `cd /tmp; unidecode "\x{0000}" > cc.txt; open -e cc.txt`
@@ -187,7 +191,8 @@ sudo pmset -a lidwake 1
 sudo pmset -a autorestart 1
 
 # Restart automatically if the computer freezes
-sudo systemsetup -setrestartfreeze on
+# Note: systemsetup is deprecated on modern macOS, errors are expected
+sudo systemsetup -setrestartfreeze on 2>/dev/null
 
 # Sleep the display after 5 minutes on battery, 20 on power
 sudo pmset -b displaysleep 5
@@ -196,14 +201,14 @@ sudo pmset -c displaysleep 20
 # Disable machine sleep while charging
 sudo pmset -c sleep 0
 
-# Set machine sleep to 5 minutes on battery
-sudo pmset -b sleep 5
+# Set machine sleep to 10 minutes on battery (must be > displaysleep)
+sudo pmset -b sleep 10
 
 # Set standby delay to 24 hours (default is 1 hour)
 sudo pmset -a standbydelay 86400
 
 # Never go into computer sleep mode
-sudo systemsetup -setcomputersleep Off > /dev/null
+sudo systemsetup -setcomputersleep Off 2>/dev/null
 
 # Hibernation mode
 # 0: Disable hibernation (speeds up entering sleep mode)
@@ -212,11 +217,10 @@ sudo systemsetup -setcomputersleep Off > /dev/null
 sudo pmset -a hibernatemode 0
 
 # Remove the sleep image file to save disk space
-sudo rm /private/var/vm/sleepimage
-# Create a zero-byte file instead…
-sudo touch /private/var/vm/sleepimage
-# …and make sure it can’t be rewritten
-sudo chflags uchg /private/var/vm/sleepimage
+# Note: on modern macOS with SIP, this may not be possible — skip if it fails
+sudo rm -f /private/var/vm/sleepimage 2>/dev/null
+sudo touch /private/var/vm/sleepimage 2>/dev/null
+sudo chflags uchg /private/var/vm/sleepimage 2>/dev/null
 
 ###############################################################################
 # Screen                                                                      #
