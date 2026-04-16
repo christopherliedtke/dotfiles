@@ -8,9 +8,9 @@ eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null || true
 ###############################################################################
 
 extensions=(
-    # AI
-    github.copilot
-    github.copilot-chat
+    # AI & Design
+    anthropic.claude-code
+    highagency.pencildev
 
     # Git
     eamodio.gitlens
@@ -19,6 +19,7 @@ extensions=(
     # Code quality & formatting
     esbenp.prettier-vscode
     dbaeumer.vscode-eslint
+    biomejs.biome
     aaron-bond.better-comments
 
     # HTML / CSS
@@ -30,12 +31,11 @@ extensions=(
     wix.vscode-import-cost
     yoavbls.pretty-ts-errors
     cardinal90.multi-cursor-case-preserve
-    alduncanson.react-hooks-snippets
-    conrad-hunter.next-ts-snippets
+    prisma.prisma
 
-    # GraphQL
-    graphql.vscode-graphql
-    graphql.vscode-graphql-syntax
+    # Markdown
+    shd101wyy.markdown-preview-enhanced
+    unifiedjs.vscode-mdx
 
     # Database
     mongodb.mongodb-vscode
@@ -46,7 +46,6 @@ extensions=(
     kisstkondoros.vscode-gutter-preview
     ritwickdey.liveserver
     mikestead.dotenv
-    alefragnani.project-manager
     dakshmiglani.hex-to-rgba
 
     # Theme & icons
