@@ -212,6 +212,7 @@ apps=(
     "keepassxc"           # Password manager
     "tor-browser"
     "slack"
+    "whatsapp"
 )
 
 for app in "${apps[@]}"; do
