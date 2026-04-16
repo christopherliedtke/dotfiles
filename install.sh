@@ -46,15 +46,6 @@ else
     echo "✓ Rosetta 2 already installed"
 fi
 
-echo ""
-echo "ACTION REQUIRED — grant Full Disk Access to your terminals before continuing:"
-echo "  System Settings → Privacy & Security → Full Disk Access"
-echo "  Enable: iTerm2, Cursor, Visual Studio Code"
-echo "  (Without this, file operations in the integrated terminal will fail silently)"
-echo ""
-echo "Press enter when done..."
-read
-
 ###############################################################################
 # 1. Symlinks                                                                 #
 ###############################################################################
@@ -85,6 +76,19 @@ zsh ./macOS.sh
 echo ""
 echo "Running Homebrew setup..."
 zsh ./brew.sh
+
+###############################################################################
+# Full Disk Access prompt (apps are now installed)                            #
+###############################################################################
+
+echo ""
+echo "ACTION REQUIRED — grant Full Disk Access to your terminals:"
+echo "  System Settings → Privacy & Security → Full Disk Access"
+echo "  Enable: iTerm2, Cursor, Visual Studio Code"
+echo "  (Without this, file operations in the integrated terminal will fail silently)"
+echo ""
+echo "Press enter when done..."
+read
 
 ###############################################################################
 # 4. SSH Key                                                                  #
