@@ -441,6 +441,27 @@ Verify Stripe: `stripe config --list`
 - `~/.config/opencode/config.json` — opencode + ollama setup
 - `~/.cursor/mcp.json` — global Cursor MCP servers (next-devtools, context7)
 
+### Agent skills (Claude Code & Cursor)
+
+**Local skills** — copy from backup:
+```bash
+# Claude Code skills
+mkdir -p ~/.claude/skills
+for skill in pdf-to-job-html react-doctor skill-creator stage-commit-pr vercel-react-best-practices web-design-guidelines; do
+  cp -r /tmp/env-restore/.claude/skills/$skill ~/.claude/skills/
+done
+cp /tmp/env-restore/.claude/skills/pdf-to-job-html.skill ~/.claude/skills/
+
+# Cursor skills
+mkdir -p ~/.cursor/skills
+for skill in react-doctor vercel-react-best-practices web-design-guidelines; do
+  cp -r /tmp/env-restore/.cursor/skills/$skill ~/.cursor/skills/
+done
+```
+
+**Registry skills** (symlinked, can't transfer) — reinstall via `/find-skills` in Claude Code:
+- `agent-browser`, `docx`, `find-skills`, `frontend-design`, `git-commit`, `word-document-processor`
+
 ### Shell history
 
 Included in backup. Restore:
