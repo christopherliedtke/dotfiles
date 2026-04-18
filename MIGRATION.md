@@ -485,9 +485,9 @@ Installed automatically by `brew.sh`: `vercel`, `eslint`, `@agentmail/cli`, `age
 
 ### Python virtual environments
 
-`.venv` directories are not backed up — recreate them:
+`.venv` directories are not backed up — recreate them per project:
 ```bash
-cd ~/DEV/mcp-servers/flights-mcp
+cd ~/path/to/python-project
 uv sync   # or: python3 -m venv .venv && pip install -r requirements.txt
 ```
 
