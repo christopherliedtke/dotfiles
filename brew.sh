@@ -186,6 +186,7 @@ apps=(
     # Development
     "visual-studio-code"
     "cursor"              # AI-first editor (primary IDE)
+    "t3-code"             # T3 Stack editor
     "iterm2"
     "cmux"                # Terminal multiplexer manager
     "postman"

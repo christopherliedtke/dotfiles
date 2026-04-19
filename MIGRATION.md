@@ -121,6 +121,7 @@ Requires `sudo` for some settings. Kills Dock, Finder, and SystemUIServer at the
 | Helium Browser | Floating browser window |
 | VS Code | Editor |
 | Cursor | AI-first editor (primary IDE) |
+| T3 Code | T3 Stack editor |
 | iTerm2 | Terminal |
 | cmux | Terminal multiplexer manager |
 | Postman | API testing |
